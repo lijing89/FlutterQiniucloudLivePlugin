@@ -1,6 +1,6 @@
 # flutter_qiniucloud_live_plugin
 
-Flutter 七牛云直播云插件
+Flutter 七牛云直播云插件，支持IOS、Android客户端
 
 ## Getting Started
 
@@ -28,7 +28,6 @@ Flutter 七牛云直播云插件
 ## 集成
 
 ### Flutter
-目前暂不支持通过 flutter packages 仓库集成，仅能通过如下方式:
 ```
  flutter_qiniucloud_live_plugin:
     git:
@@ -41,114 +40,108 @@ Flutter 七牛云直播云插件
 ### IOS
 配置权限信息，在Info.plist中增加
 ```
-    <key>io.flutter.embedded_views_preview</key>
+<key>io.flutter.embedded_views_preview</key>
+<true/>
+<key>NSAppTransportSecurity</key>
+<dict>
+    <key>NSAllowsArbitraryLoads</key>
     <true/>
-	<key>NSAppTransportSecurity</key>
-	<dict>
-		<key>NSAllowsArbitraryLoads</key>
-		<true/>
-	</dict>
-	<key>NSCameraUsageDescription</key>
-	<string>App需要您的同意,才能访问相机</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>App需要您的同意,才能访问麦克风</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>App需要您的同意,才能访问相册</string>
-	<key>UIBackgroundModes</key>
-	<array>
-		<string>audio</string>
-	</array>
+</dict>
+<key>NSCameraUsageDescription</key>
+<string>App需要您的同意,才能访问相机</string>
+<key>NSMicrophoneUsageDescription</key>
+<string>App需要您的同意,才能访问麦克风</string>
+<key>NSPhotoLibraryUsageDescription</key>
+<string>App需要您的同意,才能访问相册</string>
+<key>UIBackgroundModes</key>
+<array>
+    <string>audio</string>
+</array>
 ```
 
 ## 注意事项
 由于Android、IOS底层兼容不一致，导致以下内容会受影响：
-* QiniucloudPlayerView 监听器
-    0. Error 回调参数:`Android:int 错误码` or `IOS:String 错误描述`
-    0. Info 状态码: `IOS` or `Android` 不一致
-        0. Android:Int 状态码，参考:`https://developer.qiniu.com/pili/sdk/1210/the-android-client-sdk`
-        0. IOS:Int 状态码，对应下标:
-            ```
-               /**
-                PLPlayer 未知状态，只会作为 init 后的初始状态，开始播放之后任何情况下都不会再回到此状态。
-                @since v1.0.0
-                */
-               PLPlayerStatusUnknow = 0,
-               
-               /**
-                PLPlayer 正在准备播放所需组件，在调用 -play 方法时出现。
-                
-                @since v1.0.0
-                */
-               PLPlayerStatusPreparing,
-               
-               /**
-                PLPlayer 播放组件准备完成，准备开始播放，在调用 -play 方法时出现。
-                
-                @since v1.0.0
-                */
-               PLPlayerStatusReady,
-               
-               /**
-                PLPlayer 播放组件准备完成，准备开始连接
-                
-                @warning 请勿在此状态时，调用 playWithURL 切换 URL 操作
-                
-                @since v3.2.1
-                */
-               PLPlayerStatusOpen,
-               
-               /**
-                @abstract PLPlayer 缓存数据为空状态。
-                
-                @discussion 特别需要注意的是当推流端停止推流之后，PLPlayer 将出现 caching 状态直到 timeout 后抛出 timeout 的 error 而不是出现 PLPlayerStatusStopped 状态，因此在直播场景中，当流停止之后一般做法是使用 IM 服务告知播放器停止播放，以达到即时响应主播断流的目的。
-                
-                @since v1.0.0
-                */
-               PLPlayerStatusCaching,
-               
-               /**
-                PLPlayer 正在播放状态。
-                
-                @since v1.0.0
-                */
-               PLPlayerStatusPlaying,
-               
-               /**
-                PLPlayer 暂停状态。
-                
-                @since v1.0.0
-                */
-               PLPlayerStatusPaused,
-               
-               /**
-                @abstract PLPlayer 停止状态
-                @discussion 该状态仅会在回放时播放结束出现，RTMP 直播结束并不会出现此状态
-                
-                @since v1.0.0
-                */
-               PLPlayerStatusStopped,
-               
-               /**
-                PLPlayer 错误状态，播放出现错误时会出现此状态。
-                
-                @since v1.0.0
-                */
-               PLPlayerStatusError,
-               
-               /**
-                *  PLPlayer 自动重连的状态
-                */
-               PLPlayerStateAutoReconnecting,
-               
-               /**
-                *  PLPlayer 播放完成（该状态只针对点播有效）
-                */
-               PLPlayerStatusCompleted,
-           ```
-    0. VideoSizeChanged 回调：`仅支持Android`
-* QiniucloudPlayerDisplayAspectRatioEnum
-    0. IOS不支持 `ASPECT_RATIO_FIT_PARENT` 属性
+### QiniucloudPlayerView 监听器  
+0. Error 回调参数:`Android:int 错误码` or `IOS:String 错误描述`  
+0. Info 状态码: `IOS` or `Android` 不一致  
+    * Android
+    
+        |  状态码   | 描述 |
+        |  ----  | ---- |
+        | 1  | 未知消息
+        | 3  | 第一帧视频已成功渲染
+        | 200  | 连接成功
+        | 340  | 读取到 metadata 信息
+        | 701  | 开始缓冲
+        | 702  | 停止缓冲
+        | 802  | 硬解失败，自动切换软解
+        | 901  | 预加载完成
+        | 8088  | loop 中的一次播放完成
+        | 10001	| 获取到视频的播放角度
+        | 10002	| 第一帧音频已成功播放
+        | 10003	| 获取视频的I帧间隔
+        | 20001	| 视频的码率统计结果
+        | 20002	| 视频的帧率统计结果
+        | 20003	| 音频的帧率统计结果
+        | 20004	| 音频的帧率统计结果
+        | 10004	| 视频帧的时间戳
+        | 10005	| 音频帧的时间戳
+        | 1345	| 离线缓存的部分播放完成
+        | 565	| 上一次 seekTo 操作尚未完成
+        
+    * IOS
+    
+        |  状态码   | 描述 |
+        |  ----  | ---- |
+        | 0  | 未知状态，只会作为 init 后的初始状态，开始播放之后任何情况下都不会再回到此状态。
+        | 1  | 正在准备播放所需组件，在调用 -play 方法时出现。
+        | 2  | 播放组件准备完成，准备开始播放，在调用 -play 方法时出现。
+        | 3  | 播放组件准备完成，准备开始连接
+        | 4  | 缓存数据为空状态。(特别需要注意的是当推流端停止推流之后，PLPlayer 将出现 caching 状态直到 timeout 后抛出 timeout 的 error 而不是出现 PLPlayerStatusStopped 状态，因此在直播场景中，当流停止之后一般做法是使用 IM 服务告知播放器停止播放，以达到即时响应主播断流的目的。)
+        | 5  | 正在播放状态。
+        | 6  | 暂停状态。
+        | 7  | 停止状态 (该状态仅会在回放时播放结束出现，RTMP 直播结束并不会出现此状态)
+        | 8  | 错误状态，播放出现错误时会出现此状态。
+        | 9  | 自动重连的状态
+        | 10 | 播放完成（该状态只针对点播有效）
+        
+0. VideoSizeChanged 回调：`仅支持Android`  
 
+### QiniucloudPushView 监听器  
+0. StateChanged 状态码: `IOS` or `Android` 不一致  
+    
+    |  状态码   | 描述 | Android | Ios
+    |  ----  | ---- | ---- | ---- |
+    | PREPARING  | - | √ | √
+    | READY  | 相机准备就绪 | √ | √
+    | CONNECTING  | 连接中 | √ | √
+    | STREAMING  | 推流中 | √ | √
+    | SHUTDOWN  | 直播中断 | √ | 
+    | IOERROR  | 网络连接失败(连接rtmp推流失败) | √ | √
+    | OPEN_CAMERA_FAIL  | 摄像头打开失败 | √ | 
+    | AUDIO_RECORDING_FAIL  | 麦克风打开失败 | √ |
+    | DISCONNECTED  | 已经断开连接(直播断开) | √ | √
+    | TORCH_INFO  | 开启闪光灯 | √ |
+
+0. StreamStatusChanged 状态  
+    IOS 仅包含 `audioFps、videoFps、totalAVBitrate` 属性
+    
+0. ConferenceStateChanged IOS暂不支持(计划内)
+
+0. UserJoinConference IOS暂不支持(计划内)
+
+0. UserLeaveConference IOS暂不支持(计划内)
+
+0. RecordAudioFailedHandled IOS暂不支持
+
+0. RestartStreamingHandled IOS暂不支持
+
+0. PreviewSizeSelected IOS暂不支持
+
+0. PreviewFpsSelected IOS暂不支持
+
+0. AudioSourceAvailable IOS暂不支持
+        
 ## 使用
 使用Demo时请主动更改推流地址和播放地址  
 <img src="https://raw.githubusercontent.com/JiangJuHong/access-images/master/FlutterQiniucloudLivePlugin/start.png" height="300em" style="max-width:100%;">
@@ -180,20 +173,21 @@ QiniucloudPushView(
 #### 相关接口:(QiniucloudPushViewController调用方法)  
 |  接口   | 说明  | 参数  | Android | IOS |
 |  ----  | ----  | ----  | ----  | ----  |
-| resume  | 打开摄像头和麦克风采集 | - | √ | 
-| pause  | 关闭摄像头和麦克风采集 | - | √ | 
-| stopConference  | 停止连麦 | - | √ | 
-| startStreaming  | 开始推流 | - | √ | 
-| stopStreaming  | 停止推流 | - | √ | 
-| destroy  | 销毁 | - | √ | 
-| isZoomSupported  | 查询是否支持缩放 | - | √ | 
-| setZoomValue  | 设置缩放比例 | - | √ | 
-| getMaxZoom  | 获得最大缩放比例 | - | √ | 
-| getZoom  | 获得缩放比例 | - | √ | 
-| turnLightOn  | 开启闪光灯 | - | √ | 
-| turnLightOff  | 关闭闪光灯 | - | √ | 
-| switchCamera  | 切换摄像头 | - | √ | 
-| mute  | 切换静音 | - | √ | 
+| resume  | 打开摄像头和麦克风采集 | - | √ | √
+| pause  | 关闭摄像头和麦克风采集 | - | √ | √
+| startConference  | 开始连麦 | - | √ | 
+| stopConference  | 停止连麦 | - | √ | √
+| startStreaming  | 开始推流 | {publishUrl:'推流地址'} | √ | √
+| stopStreaming  | 停止推流 | - | √ | √
+| destroy  | 销毁 | - | √ | √
+| isZoomSupported  | 查询是否支持缩放(IOS始终返回true) | - | √ | √
+| setZoomValue  | 设置缩放比例 | {value:'比例值'} | √ | √
+| getMaxZoom  | 获得最大缩放比例 | - | √ | √
+| getZoom  | 获得缩放比例 | - | √ | √
+| turnLightOn  | 开启闪光灯 | - | √ | √
+| turnLightOff  | 关闭闪光灯 | - | √ | √
+| switchCamera  | 切换摄像头 | - | √ | √
+| mute  | 切换静音 | {mute:'是否静音',audioSource:'音频源'} | √ | √
 | kickoutUser  | 根据用户ID踢人 | - | √ | 
 | setConferenceOptions  | 设置连麦参数 | - | √ | 
 | setStreamingProfile  | 更新推流参数 | - | √ | 

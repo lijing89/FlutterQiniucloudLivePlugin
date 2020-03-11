@@ -58,33 +58,30 @@ class PushPageState extends State<PushPage> {
   onViewCreated(QiniucloudPushViewController controller) async {
     this.controller = controller;
     controller.addListener(onListener);
-    bool result = await controller.resume();
-    this.setState(() => info = "预览执行结果: $result");
+//    bool result = await controller.resume();
+//    this.setState(() => info = "预览执行结果: $result");
   }
 
   /// 监听器
   onListener(type, params) {
     // 状态改变监听
     if (type == QiniucloudPushListenerTypeEnum.StateChanged) {
-      Map<String, dynamic> paramObj = jsonDecode(params);
-      stateChanged(paramObj["status"], paramObj["extra"]);
+      stateChanged(params.toString());
     }
 
     // 连麦状态改变监听
     if (type == QiniucloudPushListenerTypeEnum.ConferenceStateChanged) {
-      Map<String, dynamic> paramObj = jsonDecode(params);
-      print("连麦状态改变:${paramObj["status"]},${paramObj["extra"]}");
-      connectedStateChanged(paramObj["status"], paramObj["extra"]);
+      connectedStateChanged(params);
     }
   }
 
   /// 状态改变事件
-  stateChanged(status, extra) async {
+  stateChanged(status) async {
     this.setState(() => this.status = status);
   }
 
   /// 设置连麦状态
-  connectedStateChanged(status, extra) async {
+  connectedStateChanged(status) async {
     this.setState(() => this.connectedStatus = status);
   }
 
@@ -175,25 +172,10 @@ class PushPageState extends State<PushPage> {
     this.setState(() => info = "关闭闪光灯结果: $result");
   }
 
-  /// 切换后置摄像头
-  onSwitchBackCamera() async {
-    bool result = await controller.switchCamera(
-        target: QiniucloudCameraTypeEnum.CAMERA_FACING_BACK);
-    this.setState(() => info = "切换后置摄像头: $result");
-  }
-
-  /// 切换前置摄像头
-  onSwitchFrontCamera() async {
-    bool result = await controller.switchCamera(
-        target: QiniucloudCameraTypeEnum.CAMERA_FACING_FRONT);
-    this.setState(() => info = "切换前置摄像头: $result");
-  }
-
-  /// 切换3DR摄像头
-  onSwitch3DRCamera() async {
-    bool result = await controller.switchCamera(
-        target: QiniucloudCameraTypeEnum.CAMERA_FACING_3RD);
-    this.setState(() => info = "切换3DR摄像头: $result");
+  /// 切换摄像头
+  onSwitchCamera() async {
+    bool result = await controller.switchCamera();
+    this.setState(() => info = "切换摄像头: $result");
   }
 
   /// 静音
@@ -321,7 +303,7 @@ class PushPageState extends State<PushPage> {
                       faceBeauty: faceBeautySettingEntity),
                   streamingProfile: StreamingProfileEntity(
                     publishUrl:
-                        "rtmp://pili-publish.tianshitaiyuan.com/zuqulive/test?e=1583323070&token=v740N_w0pHblR7KZMSPHhfdqjxrHEv5e_yBaiq0e:UuP5vHeAIsEQqsSdwJ9b33HZ90k=",
+                        "rtmp://pili-publish.tianshitaiyuan.com/zuqulive/test?e=1583495173&token=v740N_w0pHblR7KZMSPHhfdqjxrHEv5e_yBaiq0e:B0gtMgQHqUABNL_jiqa5SmSX-Dg=1",
                   ),
                   onViewCreated: onViewCreated,
                 ),
@@ -453,14 +435,11 @@ class PushPageState extends State<PushPage> {
                             child: Text("停止推流"),
                           ),
                           RaisedButton(
-                            onPressed: this.status != null
-                                ? onCheckZoomSupported
-                                : null,
+                            onPressed: onCheckZoomSupported,
                             child: Text("是否支持缩放"),
                           ),
                           RaisedButton(
-                            onPressed:
-                                this.status != null ? onSetMaxZoom : null,
+                            onPressed: onSetMaxZoom,
                             child: Text("设置为最大缩放比例"),
                           ),
                           RaisedButton(
@@ -468,40 +447,23 @@ class PushPageState extends State<PushPage> {
                             child: Text("重置缩放比例"),
                           ),
                           RaisedButton(
-                            onPressed:
-                                this.status != null ? onTurnLightOn : null,
+                            onPressed: onTurnLightOn,
                             child: Text("开启闪光灯"),
                           ),
                           RaisedButton(
-                            onPressed:
-                                this.status != null ? onTurnLightOff : null,
+                            onPressed: onTurnLightOff,
                             child: Text("关闭闪光灯"),
                           ),
                           RaisedButton(
-                            onPressed: this.status != null
-                                ? onSwitchFrontCamera
-                                : null,
-                            child: Text("切换前置摄像头"),
+                            onPressed: onSwitchCamera,
+                            child: Text("切换摄像头"),
                           ),
                           RaisedButton(
-                            onPressed:
-                                this.status != null ? onSwitchBackCamera : null,
-                            child: Text("切换后置摄像头"),
-                          ),
-                          RaisedButton(
-                            onPressed:
-                                this.status != null ? onSwitch3DRCamera : null,
-                            child: Text("切换3DR摄像头"),
-                          ),
-                          RaisedButton(
-                            onPressed:
-                                this.status != null ? () => onMute(true) : null,
+                            onPressed: () => onMute(true),
                             child: Text("开启静音"),
                           ),
                           RaisedButton(
-                            onPressed: this.status != null
-                                ? () => onMute(false)
-                                : null,
+                            onPressed: () => onMute(false),
                             child: Text("恢复声音"),
                           ),
                           RaisedButton(
